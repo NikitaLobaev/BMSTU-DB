@@ -28,10 +28,12 @@ func (userUsecase *UserUsecase) Create(user *models.User) *Response {
 		return NewResponse(http.StatusConflict, users)
 	}
 
-	if err := userUsecase.userRepository.Insert(user); err != nil {
+	newUser, err := userUsecase.userRepository.Insert(user)
+	if err != nil {
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
-	return NewResponse(http.StatusOK, user)
+
+	return NewResponse(http.StatusOK, newUser)
 }
 
 func (userUsecase *UserUsecase) GetByNickname(nickname string) *Response {
@@ -42,6 +44,14 @@ func (userUsecase *UserUsecase) GetByNickname(nickname string) *Response {
 				Message: "Can't find user with nickname " + nickname,
 			})
 		}
+		return NewResponse(http.StatusServiceUnavailable, nil)
+	}
+	return NewResponse(http.StatusOK, user)
+}
+
+func (userUsecase *UserUsecase) Update(nickname string, userUpdate *models.UserUpdate) *Response {
+	user, err := userUsecase.userRepository.Update(nickname, userUpdate)
+	if err != nil {
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
 	return NewResponse(http.StatusOK, user)

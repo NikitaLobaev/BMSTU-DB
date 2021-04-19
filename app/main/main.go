@@ -1,15 +1,23 @@
 package main
 
 import (
-	"../../config" //TODO: import github...; везде так
-	forumDelivery "../../internal/forum/delivery"
-	forumRepository "../../internal/forum/repository"
-	forumUsecase "../../internal/forum/usecase"
-	userDelivery "../../internal/user/delivery"
-	userRepository "../../internal/user/repository"
-	userUsecase "../../internal/user/usecase"
+	ForumRepository "../../internal/forum/repository"
+	ForumUsecase "../../internal/forum/usecase"
+	ServiceDelivery "../../internal/service/delivery"
+	ServiceRepository "../../internal/service/repository"
+	ServiceUsecase "../../internal/service/usecase"
+	ThreadDelivery "../../internal/thread/delivery"
+	ThreadRepository "../../internal/thread/repository"
+	ThreadUsecase "../../internal/thread/usecase"
+	UserDelivery "../../internal/user/delivery"
+	UserRepository "../../internal/user/repository"
+	UserUsecase "../../internal/user/usecase"
+	VoteRepository "../../internal/vote/repository"
+	VoteUsecase "../../internal/vote/usecase"
 	"database/sql"
 	"fmt"
+	"github.com/NikitaLobaev/BMSTU-DB/config" //TODO: import github...; везде так
+	ForumDelivery "github.com/NikitaLobaev/BMSTU-DB/internal/forum/delivery"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"log"
@@ -49,19 +57,29 @@ func main() {
 
 	fmt.Println("Database config:", dbConfigString)
 
-	forumRepository_ := forumRepository.NewForumRepository(dbConnection)
-	userRepository_ := userRepository.NewUserRepository(dbConnection)
+	forumRepository := ForumRepository.NewForumRepository(dbConnection)
+	serviceRepository := ServiceRepository.NewServiceRepository(dbConnection)
+	threadRepository := ThreadRepository.NewThreadRepository(dbConnection)
+	userRepository := UserRepository.NewUserRepository(dbConnection)
+	voteRepository := VoteRepository.NewVoteRepository(dbConnection)
 
-	forumUsecase_ := forumUsecase.NewForumUsecase(forumRepository_)
-	userUsecase_ := userUsecase.NewUserUsecase(userRepository_)
+	forumUsecase := ForumUsecase.NewForumUsecase(forumRepository)
+	serviceUsecase := ServiceUsecase.NewServiceUsecase(serviceRepository)
+	voteUsecase := VoteUsecase.NewVoteUsecase(voteRepository)
+	threadUsecase := ThreadUsecase.NewThreadUsecase(threadRepository, voteUsecase)
+	userUsecase := UserUsecase.NewUserUsecase(userRepository)
 
-	forumDelivery_ := forumDelivery.NewForumHandler(forumUsecase_)
-	userDelivery_ := userDelivery.NewUserHandler(userUsecase_)
+	forumDelivery := ForumDelivery.NewForumHandler(forumUsecase)
+	serviceDelivery := ServiceDelivery.NewServiceHandler(serviceUsecase)
+	threadDelivery := ThreadDelivery.NewThreadHandler(threadUsecase)
+	userDelivery := UserDelivery.NewUserHandler(userUsecase)
 
 	echoWS := echo.New()
 
-	forumDelivery_.Configure(echoWS)
-	userDelivery_.Configure(echoWS)
+	forumDelivery.Configure(echoWS)
+	serviceDelivery.Configure(echoWS)
+	threadDelivery.Configure(echoWS)
+	userDelivery.Configure(echoWS)
 
 	if err := echoWS.Start(genWSConfigString(config_)); err != nil {
 		log.Fatal(err)
