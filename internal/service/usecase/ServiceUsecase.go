@@ -1,24 +1,26 @@
 package usecase
 
 import (
-	. "../../tools/response"
-	"../repository"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/service/repository"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/response"
+	"github.com/labstack/gommon/log"
 	"net/http"
 )
 
 type ServiceUsecase struct {
-	userRepository *repository.ServiceRepository
+	serviceRepository repository.ServiceRepository
 }
 
-func NewServiceUsecase(serviceRepository *repository.ServiceRepository) *ServiceUsecase {
+func NewServiceUsecase(serviceRepository repository.ServiceRepository) *ServiceUsecase {
 	return &ServiceUsecase{
-		userRepository: serviceRepository,
+		serviceRepository: serviceRepository,
 	}
 }
 
 func (serviceUsecase *ServiceUsecase) Clear() *Response {
-	err := serviceUsecase.userRepository.Truncate()
+	err := serviceUsecase.serviceRepository.Truncate()
 	if err != nil {
+		log.Error(err)
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
 
@@ -26,8 +28,9 @@ func (serviceUsecase *ServiceUsecase) Clear() *Response {
 }
 
 func (serviceUsecase *ServiceUsecase) Status() *Response {
-	status, err := serviceUsecase.userRepository.Select()
+	status, err := serviceUsecase.serviceRepository.Select()
 	if err != nil {
+		log.Error(err)
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
 

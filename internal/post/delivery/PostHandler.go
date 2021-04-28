@@ -1,11 +1,13 @@
 package delivery
 
 import (
-	"../../models"
-	. "../../tools/responser"
-	"../usecase"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/models"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/post/usecase"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/responser"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type PostHandler struct {
@@ -19,35 +21,47 @@ func NewPostHandler(postUsecase *usecase.PostUsecase) *PostHandler {
 }
 
 func (postHandler *PostHandler) Configure(echoWS *echo.Echo) {
-	echoWS.GET("/api/post/:id/details", nil)
-	echoWS.POST("/api/post/:id/details", nil)
+	echoWS.GET("/api/post/:id/details", postHandler.HandlerPostGetOne())
+	echoWS.POST("/api/post/:id/details", postHandler.HandlerPostUpdate())
 }
 
-func (postHandler *PostHandler) HandlerUserCreate() echo.HandlerFunc {
+func (postHandler *PostHandler) HandlerPostGetOne() echo.HandlerFunc {
 	return func(context echo.Context) error {
-		user := new(models.User)
-		if err := context.Bind(user); err != nil {
+		userId, err := strconv.ParseUint(context.Param("id"), 10, 64)
+		if err != nil {
 			return context.NoContent(http.StatusServiceUnavailable)
 		}
-		user.Nickname = context.Param("nickname")
-		return Respond(context, postHandler.postUsecase.Create(user))
+
+		var user, forum, thread bool
+		for _, related := range strings.Split(context.QueryParam("related"), ",") {
+			switch related {
+			case "user":
+				user = true
+				break
+			case "forum":
+				forum = true
+			case "thread":
+				thread = true
+				break
+			}
+		}
+
+		return Respond(context, postHandler.postUsecase.GetPostFullById(userId, user, forum, thread))
 	}
 }
 
-func (postHandler *PostHandler) HandlerUserGetOne() echo.HandlerFunc {
+func (postHandler *PostHandler) HandlerPostUpdate() echo.HandlerFunc {
 	return func(context echo.Context) error {
-		nickname := context.Param("nickname")
-		return Respond(context, postHandler.postUsecase.GetByNickname(nickname))
-	}
-}
-
-func (postHandler *PostHandler) HandlerUpdate() echo.HandlerFunc {
-	return func(context echo.Context) error {
-		userUpdate := new(models.UserUpdate)
-		if err := context.Bind(userUpdate); err != nil {
+		userId, err := strconv.ParseUint(context.Param("id"), 10, 64)
+		if err != nil {
 			return context.NoContent(http.StatusServiceUnavailable)
 		}
-		nickname := context.Param("nickname")
-		return Respond(context, postHandler.postUsecase.Update(nickname, userUpdate))
+
+		postUpdate := new(models.PostUpdate)
+		if err := context.Bind(postUpdate); err != nil {
+			return context.NoContent(http.StatusServiceUnavailable)
+		}
+
+		return Respond(context, postHandler.postUsecase.Update(userId, postUpdate))
 	}
 }

@@ -1,7 +1,7 @@
 package responser
 
 import (
-	. "../response"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/response"
 	"github.com/labstack/echo/v4"
 )
 

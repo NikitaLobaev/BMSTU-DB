@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>5600f849-71b2-4d36-b7bd-39d451cfef63.SCHEMA:forums.public</OriginalElement>
+  <nodes>
+    <node x="125.92307692307693" y="740.5">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.vote</node>
+    <node x="89.5" y="417.0">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum_user</node>
+    <node x="292.5" y="381.0">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.thread</node>
+    <node x="392.3115384615385" y="178.0">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum</node>
+    <node x="466.1769230769231" y="656.0">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post</node>
+    <node x="304.5" y="0.0">5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum">
+      <point x="0.0" y="-136.5" />
+      <point x="559.1769230769231" y="631.0" />
+      <point x="586.375" y="631.0" />
+      <point x="586.375" y="361.0" />
+      <point x="544.8115384615385" y="361.0" />
+      <point x="60.999999999999986" y="76.5" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_">
+      <point x="62.0" y="-136.5" />
+      <point x="621.1769230769231" y="631.0" />
+      <point x="597.375" y="631.0" />
+      <point x="597.375" y="148.0" />
+      <point x="434.1" y="148.0" />
+      <point x="57.60000000000002" y="64.0" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_">
+      <point x="0.0" y="-76.5" />
+      <point x="483.8115384615385" y="158.0" />
+      <point x="405.3" y="158.0" />
+      <point x="28.80000000000001" y="64.0" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.vote" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.thread">
+      <point x="45.75" y="-52.0" />
+      <point x="263.1730769230769" y="631.0" />
+      <point x="360.0" y="631.0" />
+      <point x="-67.5" y="112.5" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum_user" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_">
+      <point x="-45.75" y="-76.5" />
+      <point x="135.25" y="158.0" />
+      <point x="347.7" y="158.0" />
+      <point x="-28.80000000000001" y="64.0" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.thread" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_">
+      <point x="-67.5" y="-112.5" />
+      <point x="360.0" y="351.0" />
+      <point x="376.5" y="351.0" />
+      <point x="0.0" y="64.0" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post">
+      <point x="-46.5" y="136.5" />
+      <point x="512.6769230769231" y="949.0" />
+      <point x="446.1769230769231" y="949.0" />
+      <point x="446.1769230769231" y="860.75" />
+      <point x="-93.0" y="68.25" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum_user" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum">
+      <point x="45.75" y="-76.5" />
+      <point x="226.75" y="361.0" />
+      <point x="422.8115384615385" y="361.0" />
+      <point x="-61.0" y="76.5" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.post" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.thread">
+      <point x="-62.0" y="-136.5" />
+      <point x="497.1769230769231" y="631.0" />
+      <point x="495.0" y="631.0" />
+      <point x="67.5" y="112.5" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.vote" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_">
+      <point x="-45.75" y="-52.0" />
+      <point x="171.67307692307693" y="631.0" />
+      <point x="79.0" y="631.0" />
+      <point x="79.0" y="148.0" />
+      <point x="318.9" y="148.0" />
+      <point x="-57.60000000000002" y="64.0" />
+    </edge>
+    <edge source="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.thread" target="5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.forum">
+      <point x="67.5" y="-112.5" />
+      <point x="495.0" y="361.0" />
+      <point x="483.8115384615385" y="361.0" />
+      <point x="0.0" y="76.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.8947368421052632" x="338.5" y="474.5" />
+  <SelectedNodes>
+    <node>5600f849-71b2-4d36-b7bd-39d451cfef63.TABLE:forums.public.user_</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+

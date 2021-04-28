@@ -13,5 +13,4 @@ type Thread struct {
 	Created      time.Time `json:"created"`
 }
 
-//easyjson:json
 type Threads []*Thread

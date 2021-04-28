@@ -1,9 +1,9 @@
 package delivery
 
 import (
-	"../../models"
-	. "../../tools/responser"
-	"../usecase"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/models"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/responser"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/user/usecase"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

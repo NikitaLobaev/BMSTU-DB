@@ -1,21 +1,23 @@
 package usecase
 
 import (
-	"../../models"
-	. "../../tools/response"
-	VoteUsecase "../../vote/usecase"
-	"../repository"
 	"database/sql"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/models"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/thread/repository"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/response"
+	VoteUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/vote/usecase"
+	"github.com/labstack/gommon/log"
+	"github.com/lib/pq"
 	"net/http"
 	"strconv"
 )
 
 type ThreadUsecase struct {
-	threadRepository *repository.ThreadRepository
+	threadRepository repository.ThreadRepository
 	voteUsecase      *VoteUsecase.VoteUsecase
 }
 
-func NewThreadUsecase(threadRepository *repository.ThreadRepository, voteUsecase *VoteUsecase.VoteUsecase) *ThreadUsecase {
+func NewThreadUsecase(threadRepository repository.ThreadRepository, voteUsecase *VoteUsecase.VoteUsecase) *ThreadUsecase {
 	return &ThreadUsecase{
 		threadRepository: threadRepository,
 		voteUsecase:      voteUsecase,
@@ -34,12 +36,13 @@ func (threadUsecase *ThreadUsecase) Create(thread *models.Thread) *Response {
 				Message: "Can't find user with nickname " + thread.UserNickname + " or forum with slug " + thread.ForumSlug,
 			})
 		}
+		log.Error(err)
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
-	return NewResponse(http.StatusOK, thread2)
+	return NewResponse(http.StatusCreated, thread2)
 }
 
-func (threadUsecase *ThreadUsecase) GetDetails(slugOrId string) *Response {
+func (threadUsecase *ThreadUsecase) GetBySlugOrId(slugOrId string) *Response {
 	id, err := strconv.ParseUint(slugOrId, 10, 32)
 	var thread *models.Thread
 	if err == nil {
@@ -54,6 +57,7 @@ func (threadUsecase *ThreadUsecase) GetDetails(slugOrId string) *Response {
 				Message: "Can't find thread with slug or id " + slugOrId,
 			})
 		}
+		log.Error(err)
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
 	return NewResponse(http.StatusOK, thread)
@@ -74,6 +78,7 @@ func (threadUsecase *ThreadUsecase) UpdateDetails(slugOrId string, threadUpdate 
 				Message: "Can't find thread with slug or id " + slugOrId,
 			})
 		}
+		log.Error(err)
 		return NewResponse(http.StatusServiceUnavailable, nil)
 	}
 	return NewResponse(http.StatusOK, thread)
@@ -85,5 +90,52 @@ func (threadUsecase *ThreadUsecase) Vote(slugOrId string, vote *models.Vote) *Re
 		return responseVote
 	}
 
-	return threadUsecase.GetDetails(slugOrId)
+	result := threadUsecase.GetBySlugOrId(slugOrId)
+	return result
+}
+
+func (threadUsecase *ThreadUsecase) GetThreadsByForumSlug(forumSlug string, forumParams *models.ForumParams) *Response {
+	threads, err := threadUsecase.threadRepository.SelectThreadsBySlug(forumSlug, forumParams)
+	if err != nil {
+		log.Error(err)
+		return NewResponse(http.StatusServiceUnavailable, nil)
+	}
+	return NewResponse(http.StatusOK, threads)
+}
+
+func (threadUsecase *ThreadUsecase) CreatePosts(slugOrId string, posts *models.Posts) *Response {
+	responseThread := threadUsecase.GetBySlugOrId(slugOrId)
+	if responseThread.Code != http.StatusOK {
+		return responseThread
+	}
+
+	posts, err := threadUsecase.threadRepository.InsertPosts(responseThread.JSONObject.(*models.Thread), posts)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return NewResponse(http.StatusNotFound, models.Error{
+				Message: "Can't find one of users",
+			})
+		} else if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "P0001" {
+			return NewResponse(http.StatusConflict, models.Error{
+				Message: "Can't find one of parent posts or it was created in another thread",
+			})
+		}
+		log.Error(err)
+		return NewResponse(http.StatusServiceUnavailable, nil)
+	}
+	return NewResponse(http.StatusCreated, posts)
+}
+
+func (threadUsecase *ThreadUsecase) GetPosts(slugOrId string, postParams *models.PostParams) *Response {
+	responseThread := threadUsecase.GetBySlugOrId(slugOrId)
+	if responseThread.Code != http.StatusOK {
+		return responseThread
+	}
+
+	posts, err := threadUsecase.threadRepository.SelectPosts(responseThread.JSONObject.(*models.Thread), postParams)
+	if err != nil {
+		log.Error(err)
+		return NewResponse(http.StatusServiceUnavailable, nil)
+	}
+	return NewResponse(http.StatusOK, posts)
 }

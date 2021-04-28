@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	. "../../tools/responser"
-	"../usecase"
+	"github.com/NikitaLobaev/BMSTU-DB/internal/service/usecase"
+	. "github.com/NikitaLobaev/BMSTU-DB/internal/tools/responser"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,8 +17,8 @@ func NewServiceHandler(userUsecase *usecase.ServiceUsecase) *ServiceHandler {
 }
 
 func (serviceHandler *ServiceHandler) Configure(echoWS *echo.Echo) {
-	echoWS.POST("/service/clear", serviceHandler.HandlerServiceClear())
-	echoWS.GET("/service/status", serviceHandler.HandlerServiceStatus())
+	echoWS.POST("/api/service/clear", serviceHandler.HandlerServiceClear())
+	echoWS.GET("/api/service/status", serviceHandler.HandlerServiceStatus())
 }
 
 func (serviceHandler *ServiceHandler) HandlerServiceClear() echo.HandlerFunc {
