@@ -49,8 +49,8 @@ USER root
 COPY --from=build /go/src/BMSTU-DB/app/main/bmstu-db /usr/bin/BMSTU-DB/
 COPY --from=build /go/src/BMSTU-DB/config.json /usr/bin/BMSTU-DB/
 
-EXPOSE 5432
-EXPOSE 5000
+# EXPOSE 5432
+# EXPOSE 5000
 
 WORKDIR /usr/bin/BMSTU-DB
 

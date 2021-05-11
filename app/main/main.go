@@ -8,30 +8,36 @@ import (
 	ForumRepository "github.com/NikitaLobaev/BMSTU-DB/internal/forum/repository"
 	ForumRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/forum/repository/v1"
 	ForumRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/forum/repository/v2"
+	ForumRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/forum/repository/v3"
 	ForumUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/forum/usecase"
 	PostDelivery "github.com/NikitaLobaev/BMSTU-DB/internal/post/delivery"
 	PostRepository "github.com/NikitaLobaev/BMSTU-DB/internal/post/repository"
 	PostRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/post/repository/v1"
 	PostRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/post/repository/v2"
+	PostRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/post/repository/v3"
 	PostUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/post/usecase"
 	ServiceDelivery "github.com/NikitaLobaev/BMSTU-DB/internal/service/delivery"
 	ServiceRepository "github.com/NikitaLobaev/BMSTU-DB/internal/service/repository"
 	ServiceRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/service/repository/v1"
 	ServiceRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/service/repository/v2"
+	ServiceRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/service/repository/v3"
 	ServiceUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/service/usecase"
 	ThreadDelivery "github.com/NikitaLobaev/BMSTU-DB/internal/thread/delivery"
 	ThreadRepository "github.com/NikitaLobaev/BMSTU-DB/internal/thread/repository"
 	ThreadRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/thread/repository/v1"
 	ThreadRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/thread/repository/v2"
+	ThreadRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/thread/repository/v3"
 	ThreadUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/thread/usecase"
 	UserDelivery "github.com/NikitaLobaev/BMSTU-DB/internal/user/delivery"
 	UserRepository "github.com/NikitaLobaev/BMSTU-DB/internal/user/repository"
 	UserRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/user/repository/v1"
 	UserRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/user/repository/v2"
+	UserRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/user/repository/v3"
 	UserUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/user/usecase"
 	VoteRepository "github.com/NikitaLobaev/BMSTU-DB/internal/vote/repository"
 	VoteRepositoryV1 "github.com/NikitaLobaev/BMSTU-DB/internal/vote/repository/v1"
 	VoteRepositoryV2 "github.com/NikitaLobaev/BMSTU-DB/internal/vote/repository/v2"
+	VoteRepositoryV3 "github.com/NikitaLobaev/BMSTU-DB/internal/vote/repository/v3"
 	VoteUsecase "github.com/NikitaLobaev/BMSTU-DB/internal/vote/usecase"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
@@ -88,6 +94,12 @@ func main() {
 		voteRepository = VoteRepositoryV2.NewVoteRepositoryV2(dbConnection)
 		break
 	case "forums_3nf":
+		forumRepository = ForumRepositoryV3.NewForumRepositoryV3(dbConnection)
+		postRepository = PostRepositoryV3.NewPostRepositoryV3(dbConnection)
+		serviceRepository = ServiceRepositoryV3.NewServiceRepositoryV3(dbConnection)
+		threadRepository = ThreadRepositoryV3.NewThreadRepositoryV3(dbConnection)
+		userRepository = UserRepositoryV3.NewUserRepositoryV3(dbConnection)
+		voteRepository = VoteRepositoryV3.NewVoteRepositoryV3(dbConnection)
 		break
 	default: //"forums_1nf"
 		forumRepository = ForumRepositoryV1.NewForumRepositoryV1(dbConnection)
