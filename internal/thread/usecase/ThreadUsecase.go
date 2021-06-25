@@ -10,6 +10,7 @@ import (
 	"github.com/lib/pq"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type ThreadUsecase struct {
@@ -107,6 +108,14 @@ func (threadUsecase *ThreadUsecase) CreatePosts(slugOrId string, posts *models.P
 	responseThread := threadUsecase.GetBySlugOrId(slugOrId)
 	if responseThread.Code != http.StatusOK {
 		return responseThread
+	}
+
+	location, _ := time.LoadLocation("UTC")
+	now := time.Now().In(location).Round(time.Microsecond)
+	for _, post := range *posts {
+		if post.Created.IsZero() {
+			post.Created = now
+		}
 	}
 
 	posts, err := threadUsecase.threadRepository.InsertPosts(responseThread.JSONObject.(*models.Thread), posts)

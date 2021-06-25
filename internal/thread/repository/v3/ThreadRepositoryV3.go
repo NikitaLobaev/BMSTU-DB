@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/NikitaLobaev/BMSTU-DB/internal/models"
 	"github.com/labstack/gommon/log"
+	"github.com/lib/pq"
 	"strconv"
 )
 
@@ -172,7 +173,7 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectThreadsBySlug(slug string, f
 		thread := new(models.Thread)
 		var threadSlug sql.NullString
 		if err = rows.Scan(&thread.Id, &thread.Title, &thread.UserNickname, &thread.ForumSlug, &thread.Message,
-			&thread.Votes, &thread.Slug, &thread.Created); err != nil {
+			&thread.Votes, &threadSlug, &thread.Created); err != nil {
 			return nil, err
 		}
 
@@ -221,7 +222,13 @@ func (threadRepositoryV3 *ThreadRepositoryV3) InsertPosts(thread *models.Thread,
 }
 
 func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread, postParams *models.PostParams) (*models.Posts, error) {
-	const query1 = "SELECT id, post_parent_id, user_nickname, message, is_edited, created, get_post_path(id) FROM post WHERE"
+	const query1 = `
+WITH roots AS (
+	SELECT id, get_post_path(id) AS path_, get_post_root_id(id) AS post_root_id FROM post
+)
+SELECT post.id, post_parent_id, user_nickname, message, is_edited, created, path_, post_root_id FROM post
+	JOIN roots ON post.id = roots.id
+WHERE`
 	const query2 = " thread_id = $1"
 	const queryMore = ">"
 	const queryLess = "<"
@@ -233,12 +240,12 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread,
 	var err error
 	switch postParams.Sort {
 	case "tree":
-		const queryOrderBy = " ORDER BY (SELECT get_post_path(id)), created, id"
-		const queryOrderByDesc = " ORDER BY (SELECT get_post_path(id)) DESC, created, id"
+		const queryOrderBy = " ORDER BY path_, created, post.id"
+		const queryOrderByDesc = " ORDER BY path_ DESC, created, post.id"
 		query += query2
 		if postParams.IsSinceSet() {
 			const queryPath1 = " AND path_ "
-			const queryPath2 = " (SELECT get_post_path($2))"
+			const queryPath2 = " (SELECT path_ FROM roots WHERE roots.id = $2)"
 			query += queryPath1
 			if postParams.IsDescSet() && postParams.Desc {
 				query += queryLess + queryPath2 + queryOrderByDesc
@@ -266,15 +273,15 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread,
 		}
 		break
 	case "parent_tree":
-		const queryPostRootId = " post_root_id IN (SELECT id FROM post WHERE post_parent_id IS NULL AND" + query2
+		const queryPostRootId = " roots.post_root_id IN (SELECT post2.id FROM post AS post2 WHERE post2.post_parent_id IS NULL AND" + query2
 		const queryDesc = " DESC"
 		query += queryPostRootId
 		if postParams.IsSinceSet() {
-			const queryPostRootId1 = " AND post_root_id "
-			const queryPostRootId2 = " (SELECT post_root_id FROM post WHERE id = $2) ORDER BY id"
+			const queryPostRootId1 = " AND (SELECT roots.post_root_id FROM roots WHERE roots.id = post2.id) "
+			const queryPostRootId2 = " (SELECT post_root_id FROM roots WHERE roots.id = $2) ORDER BY post2.id"
 			const queryLimit = " LIMIT $3"
 			const queryOrderBy1 = ") ORDER BY post_root_id"
-			const queryOrderBy2 = ", path_, created, id"
+			const queryOrderBy2 = ", path_, created, post.id"
 			query += queryPostRootId1
 			if postParams.IsDescSet() && postParams.Desc {
 				query += queryLess + queryPostRootId2 + queryDesc
@@ -295,10 +302,10 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread,
 				rows, err = threadRepositoryV3.dbConnection.Query(query, thread.Id, postParams.Since)
 			}
 		} else {
-			const queryOrderBy = " ORDER BY id"
+			const queryOrderBy = " ORDER BY post2.id"
 			const queryLimit = " LIMIT $2"
 			const queryOrderBy1 = ") ORDER BY post_root_id"
-			const queryOrderBy2 = ", path_, created, id"
+			const queryOrderBy2 = ", path_, created, post.id"
 			query += queryOrderBy
 			if postParams.IsDescSet() && postParams.Desc {
 				query += queryDesc + queryLimit + queryOrderBy1 + queryDesc + queryOrderBy2
@@ -313,11 +320,11 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread,
 		}
 		break
 	default: //flat
-		const queryOrderBy = " ORDER BY created, id"
-		const queryOrderByDesc = " ORDER BY created DESC, id DESC"
+		const queryOrderBy = " ORDER BY created, post.id"
+		const queryOrderByDesc = " ORDER BY created DESC, post.id DESC"
 		query += query2
 		if postParams.IsSinceSet() {
-			const queryId1 = " AND id "
+			const queryId1 = " AND post.id "
 			const queryId2 = " $2"
 			query += queryId1
 			if postParams.IsDescSet() && postParams.Desc {
@@ -360,8 +367,10 @@ func (threadRepositoryV3 *ThreadRepositoryV3) SelectPosts(thread *models.Thread,
 	for rows.Next() {
 		post := new(models.Post)
 		var parentPostId sql.NullInt64
-		if err := rows.Scan(&post.Id, &parentPostId, &post.UserNickname, &post.Message, &post.IsEdited,
-			&post.Created); err != nil {
+		var path []sql.NullInt64
+		var postRootId sql.NullInt64
+		if err := rows.Scan(&post.Id, &parentPostId, &post.UserNickname, &post.Message, &post.IsEdited, &post.Created,
+			pq.Array(&path), &postRootId); err != nil {
 			return nil, err
 		}
 

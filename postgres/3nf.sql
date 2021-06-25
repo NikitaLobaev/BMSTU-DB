@@ -56,6 +56,19 @@ CREATE UNLOGGED TABLE forum_user (
     PRIMARY KEY (forum_slug, user_nickname)
 );
 
+CREATE INDEX ON user_ USING hash (nickname);
+CREATE INDEX ON user_ USING hash (email);
+
+CREATE INDEX ON forum USING hash (slug);
+
+CREATE INDEX ON thread USING hash (forum_slug);
+CREATE INDEX ON thread (forum_slug, created);
+
+CREATE INDEX ON post (thread_id);
+CREATE INDEX ON post (created, id);
+
+CREATE INDEX ON forum_user USING hash (forum_slug);
+
 CREATE FUNCTION trigger_forum_before_insert()
     RETURNS TRIGGER
 AS $$
@@ -119,7 +132,7 @@ AS $$
 BEGIN
     IF NEW.post_parent_id = 0 THEN
         NEW.post_parent_id := NULL;
-    ELSEIF NEW.post_parent_id IS NOT NULL AND (SELECT thread_id FROM post WHERE id = NEW.post_parent_id) != NEW.thread_id THEN
+    ELSEIF NEW.post_parent_id IS NOT NULL AND ((SELECT COUNT(*) FROM post WHERE id = NEW.post_parent_id) = 0 OR (SELECT thread_id FROM post WHERE id = NEW.post_parent_id) != NEW.thread_id) THEN
         RAISE 'Parent post is in another thread';
     END IF;
     NEW.is_edited := FALSE;
@@ -210,7 +223,14 @@ BEGIN
         IF id_ IS NULL THEN
             EXIT;
         END IF;
-        path_ := path_ || ARRAY[id_];
+        path_ := ARRAY[id_] || path_;
     END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION get_post_root_id(id BIGINT, OUT root_id BIGINT)
+AS $$
+BEGIN
+    root_id := (get_post_path(id))[1];
 END;
 $$ LANGUAGE plpgsql;

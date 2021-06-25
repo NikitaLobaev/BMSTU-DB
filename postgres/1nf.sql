@@ -62,6 +62,19 @@ CREATE UNLOGGED TABLE forum_user (
     user_fullname TEXT NOT NULL
 );
 
+CREATE INDEX ON user_ USING hash (nickname);
+CREATE INDEX ON user_ USING hash (email);
+
+CREATE INDEX ON forum USING hash (slug);
+
+CREATE INDEX ON thread USING hash (forum_slug);
+CREATE INDEX ON thread (forum_slug, created);
+
+CREATE INDEX ON post (thread_id);
+CREATE INDEX ON post (created, id);
+
+CREATE INDEX ON forum_user USING hash (forum_slug);
+
 CREATE FUNCTION trigger_forum_before_insert()
     RETURNS TRIGGER
 AS $$

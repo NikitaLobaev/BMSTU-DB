@@ -172,7 +172,7 @@ func (threadRepositoryV2 *ThreadRepositoryV2) SelectThreadsBySlug(slug string, f
 		thread := new(models.Thread)
 		var threadSlug sql.NullString
 		if err = rows.Scan(&thread.Id, &thread.Title, &thread.UserNickname, &thread.ForumSlug, &thread.Message,
-			&thread.Votes, &thread.Slug, &thread.Created); err != nil {
+			&thread.Votes, &threadSlug, &thread.Created); err != nil {
 			return nil, err
 		}
 

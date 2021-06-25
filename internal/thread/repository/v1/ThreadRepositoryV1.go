@@ -172,7 +172,7 @@ func (threadRepositoryV1 *ThreadRepositoryV1) SelectThreadsBySlug(slug string, f
 		thread := new(models.Thread)
 		var threadSlug sql.NullString
 		if err = rows.Scan(&thread.Id, &thread.Title, &thread.UserNickname, &thread.ForumSlug, &thread.Message,
-			&thread.Votes, &thread.Slug, &thread.Created); err != nil {
+			&thread.Votes, &threadSlug, &thread.Created); err != nil {
 			return nil, err
 		}
 
@@ -220,7 +220,6 @@ func (threadRepositoryV1 *ThreadRepositoryV1) InsertPosts(thread *models.Thread,
 	return posts, nil
 }
 
-//TODO: заменить в SQL-запросах " на ` (для переноса на следующую строку...)
 func (threadRepositoryV1 *ThreadRepositoryV1) SelectPosts(thread *models.Thread, postParams *models.PostParams) (*models.Posts, error) {
 	const query1 = "SELECT id, post_parent_id, user_nickname, message, is_edited, created FROM post WHERE"
 	const query2 = " thread_id = $1"
